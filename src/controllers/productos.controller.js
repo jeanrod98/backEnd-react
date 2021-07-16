@@ -1,6 +1,6 @@
 import {getConnection, sql} from '../database/conexion'
 
-
+//Consultar productos
 export const getProductos = async (req, res) => {
     //llamamos la conexion que retorna el pool 
     const pool = await getConnection();
@@ -9,6 +9,7 @@ export const getProductos = async (req, res) => {
     res.json(result.recordset);
 };
 
+//ingresar productos
 export const createProducto = async (req, res) => {
     const { id_producto,nombre_produc,cantidad_produc,
     descripcion_produc,precio_produc,pesoImg_produc,
@@ -27,13 +28,14 @@ export const createProducto = async (req, res) => {
 
     //Agregamos los datos a la base de datos
     const pool = await getConnection();
+
     await pool
     .request()
     .input("id_producto", sql.VarChar, id_producto)
     .input("nombre_produc", sql.VarChar, nombre_produc)
     .input("cantidad_produc", sql.Int, cantidad_produc)
     .input("descripcion_produc", sql.VarChar, descripcion_produc)
-    .input("precio_produc", sql.Decimal, precio_produc)
+    .input("precio_produc", sql.Decimal(18,2), precio_produc)
     .input("pesoImg_produc", sql.Int, pesoImg_produc)
     .input("nombreImg_produc", sql.VarChar, nombreImg_produc)
     .input("promocion_produc", sql.Int, promocion_produc)
