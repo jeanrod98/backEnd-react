@@ -2,7 +2,13 @@ import express from 'express'
 import config from './config'
 import bodyParser from 'body-parser'
 
-import productosRoutes from './routes/productos.routs.'
+// Rutas
+import productosRoutes from './routes/productos.routs'
+import usuariosRoutes from './routes/usuarios.routs'
+
+
+
+
 import cors from 'cors';
 
 const app = express()
@@ -32,6 +38,6 @@ app.set('port', config.port)
  app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(productosRoutes);
+app.use(productosRoutes, usuariosRoutes);
 
 export default app

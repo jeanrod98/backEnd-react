@@ -1,16 +1,36 @@
-import {getConnection, sql} from '../database/conexion'
+import {getConnection, sql, queries} from '../database'
+
 
 //Consultar productos
 export const getProductos = async (req, res) => {
+    try {
+        
+        //llamamos la conexion que retorna el pool 
+        const pool = await getConnection();
+        //con el pool realizamos la peticion en este caso pide los productos de la bd
+        const result = await pool.request().query(queries.getAllProducts);
+        res.json(result.recordset);
+    } catch (error) {
+        res.status(500);
+        res.send(error.message);
+    }
+};
+//Consultar un producto
+export const getProductoByID = async (req, res) => {
+    // obtener el id que nos mandan 
+    const {id} = req.params 
     //llamamos la conexion que retorna el pool 
     const pool = await getConnection();
     //con el pool realizamos la peticion en este caso pide los productos de la bd
-    const result = await pool.request().query('SELECT * FROM TMAEPRODUCTO');
-    res.json(result.recordset);
+    const result = await pool.request()
+    .input('id', id)
+    .query(queries.getProductById);
+    res.json(result.recordset[0]);
 };
 
 //ingresar productos
 export const createProducto = async (req, res) => {
+    try{
     const { id_producto,nombre_produc,cantidad_produc,
     descripcion_produc,precio_produc,pesoImg_produc,
     nombreImg_produc,promocion_produc,imagen_produc } = req.body;
@@ -42,9 +62,12 @@ export const createProducto = async (req, res) => {
     .input("imagen_produc", sql.VarChar, imagen_produc)
     .input("fechaReg_produc", sql.SmallDateTime, fechaReg_produc)
 
-    .query(
-        "INSERT INTO TMAEPRODUCTO (id_producto, nombre_produc, cantidad_produc, descripcion_produc, precio_produc, pesoImg_produc, nombreImg_produc, promocion_produc, imagen_produc, fechaReg_produc) VALUES (@id_producto, @nombre_produc, @cantidad_produc, @descripcion_produc, @precio_produc, @pesoImg_produc, @nombreImg_produc, @promocion_produc, @imagen_produc, @fechaReg_produc)"
-    );
+    .query(queries.addNewProducts);
 
-    res.json('nuevo producto')
+    res.json({id_producto, nombre_produc, cantidad_produc, descripcion_produc, precio_produc, pesoImg_produc, nombreImg_produc, promocion_produc, imagen_produc, fechaReg_produc})
+
+    } catch (error) {
+        res.status(500);
+        res.send(error.message);
+    }
 };

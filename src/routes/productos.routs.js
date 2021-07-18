@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import 'body-parser'
-import {getProductos, createProducto} from '../controllers/productos.controller'
+import {getProductos, getProductoByID, createProducto} from '../controllers/productos.controller'
 
 const router = Router()
 
@@ -8,7 +8,7 @@ router.get('/productos', getProductos);
 
 router.post('/productos', createProducto);
 
-router.get('/productos', );
+router.get('/productos/:id', getProductoByID);
 
 router.delete('/productos', );
 
