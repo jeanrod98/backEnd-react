@@ -15,17 +15,24 @@ export const getProductos = async (req, res) => {
         res.send(error.message);
     }
 };
-//Consultar un producto
+//Consultar un producto por id
 export const getProductoByID = async (req, res) => {
-    // obtener el id que nos mandan 
-    const {id} = req.params 
-    //llamamos la conexion que retorna el pool 
-    const pool = await getConnection();
-    //con el pool realizamos la peticion en este caso pide los productos de la bd
-    const result = await pool.request()
-    .input('id', id)
-    .query(queries.getProductById);
-    res.json(result.recordset[0]);
+    try {
+        
+        // obtener el id que nos mandan 
+        const {id} = req.params 
+        //llamamos la conexion que retorna el pool 
+        const pool = await getConnection();
+        //con el pool realizamos la peticion en este caso pide los productos de la bd
+        const result = await pool.request()
+        .input('id', id)
+        .query(queries.getProductById);
+        res.json(result.recordset[0]);
+    } catch (error) {
+        res.status(500);
+        res.send(error.message);
+        
+    }
 };
 
 //ingresar productos
