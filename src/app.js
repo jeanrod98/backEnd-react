@@ -1,10 +1,12 @@
 import express from 'express'
 import config from './config'
 import bodyParser from 'body-parser'
+import path from 'path'
 
 // Rutas
 import productosRoutes from './routes/productos.routs'
 import usuariosRoutes from './routes/usuarios.routs'
+import facturasRoutes from './routes/facturas.routs'
 
 
 
@@ -12,6 +14,9 @@ import usuariosRoutes from './routes/usuarios.routs'
 import cors from 'cors';
 
 const app = express()
+
+
+
 
 //habilitar cors
 app.use(cors());
@@ -38,6 +43,18 @@ app.set('port', config.port)
  app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(productosRoutes, usuariosRoutes);
+app.use(productosRoutes, usuariosRoutes, facturasRoutes);
 
+// app.get('/facturas/:id', (req,res ) =>{
+    
+//     try {
+//         const {id} = req.params 
+//         console.log();
+//         res.sendFile(__dirname+`/public/pdfs/${id}.pdf`);
+//     } catch (error) {
+//         res.send('Page Not Fount')
+//     }
+
+// });
+app.use(express.static('public/pdfs'));
 export default app
