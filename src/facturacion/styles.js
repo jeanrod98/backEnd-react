@@ -1,9 +1,10 @@
+
 module.exports = {
     header: {
         fontSize: 18,
         bold: true,
         margin: [0, 0, 0, 10],
-        color: '#fc5c1b',
+        color: '#000000',
     },
     subheader: {
         fontSize: 16,
@@ -18,6 +19,14 @@ module.exports = {
         fontSize: 13,
         color: '#000000',
         // background: "#fc5c1b",
-    }
+    },
+    productos: {
+        bold: true,
+        fontSize: 10,
+        margin: [0, 5, 0, 15],
+
+    },
+    
+
 
 };
