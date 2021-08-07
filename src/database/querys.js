@@ -10,4 +10,7 @@ export const queries = {
   postFacturaMov: `INSERT INTO TMOVFACTDETALLE (factura_id, producto_id, cantidad_det, precioUnitario_det, delivery_id) VALUES (@factura_id, @producto_id, @cantidad_det, @precioUnitario_det, @delivery_id)`,
 
   getIdFactura:'SELECT codigo_fact FROM TMAEFACTURA',
+
+  getDelivery: 'SELECT * FROM TMAEDELIVERY',
+  getDeliveryById: 'SELECT * FROM TMAEDELIVERY WHERE id_delivery = @id_delivery',
 };

@@ -7,6 +7,7 @@ import path from 'path'
 import productosRoutes from './routes/productos.routs'
 import usuariosRoutes from './routes/usuarios.routs'
 import facturasRoutes from './routes/facturas.routs'
+import deliveryRoutes from './routes/delivery.routs'
 
 
 
@@ -43,7 +44,7 @@ app.set('port', config.port)
  app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(productosRoutes, usuariosRoutes, facturasRoutes);
+app.use(productosRoutes, usuariosRoutes, facturasRoutes, deliveryRoutes);
 
 // app.get('/facturas/:id', (req,res ) =>{
     
