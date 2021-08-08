@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import 'body-parser'
-import {getUsuario, createUsuario, postUsuarioAuth} from '../controllers/usuarios.controller'
+import {getUsuario, createUsuario, postUsuarioAuth, getUsuarioById} from '../controllers/usuarios.controller'
 
 const router = Router()
 
@@ -11,7 +11,7 @@ router.post('/usuarios', createUsuario);
 
 router.post('/userAuth', postUsuarioAuth );
 
-router.delete('/usuarios', );
+router.get('/usuarios/:id', getUsuarioById);
 
 router.put('/usuarios', );
 

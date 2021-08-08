@@ -5,6 +5,8 @@ export const queries = {
   getProductById: "SELECT * FROM TMAEPRODUCTO WHERE id_producto = @id",
   getAllUsers: "SELECT * FROM TMAEUSUARIO",
   postUsuarioAuth: "SELECT * FROM TMAEUSUARIO WHERE correo_usu=@correo_usu AND contraseña_usu=@contrasenia_usu",
+  getUserById: "SELECT * FROM TMAEUSUARIO WHERE id_usuario = @id",
+
   postFactura: `INSERT INTO TMAEFACTURA (id_usuario, url_fac, fechaReg_fac, estado_fac) VALUES (@id_usuario, @url_fac, @fechaReg_fac, @estado_fac);  SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]`,
 
   postFacturaMov: `INSERT INTO TMOVFACTDETALLE (factura_id, producto_id, cantidad_det, precioUnitario_det, delivery_id) VALUES (@factura_id, @producto_id, @cantidad_det, @precioUnitario_det, @delivery_id)`,

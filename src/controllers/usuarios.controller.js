@@ -55,6 +55,43 @@ export const postUsuarioAuth = async (req, res) => {
         
     }
 };
+// Consultar usuario por id 
+export const getUsuarioById = async (req, res) => {
+    try {
+        
+        // obtener el id que nos mandan 
+        const {id} = req.params 
+        //llamamos la conexion que retorna el pool 
+        const pool = await getConnection();
+        //con el pool realizamos la peticion en este caso pide los productos de la bd
+        const result = await pool.request()
+        .input('id', id)
+        .query(queries.getUserById);
+
+        const {id_usuario, nombre_usu, apellido_usu, tipo_usu, celular_usu, correo_usu, direccion_usu} = result.recordset[0];
+        // console.log(id_usuario);
+        // console.log(nombre_usu);
+        // console.log(apellido_usu);
+        // console.log(tipo_usu);
+        const userResponse = {
+            id_usuario,
+            nombres: nombre_usu+' '+apellido_usu,
+            tipo_usu,
+            celular_usu,
+            correo_usu,
+            direccion_usu,
+
+
+        }
+        res.json(userResponse);
+
+
+    } catch (error) {
+        res.status(500);
+        res.send(error.message);
+        
+    }
+};
 
 //ingresar usuarios
 export const createUsuario = async (req, res) => {
