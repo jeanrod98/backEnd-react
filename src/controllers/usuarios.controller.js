@@ -40,7 +40,8 @@ export const postUsuarioAuth = async (req, res) => {
             id_usuario: id_usuario,
             nombre_usu: nombre_usu,
             apellido_usu: apellido_usu,
-            tipo_usu: tipo_usu
+            tipo_usu: tipo_usu,
+            correo_usu
         }
         if(result.recordset.length == 0){
             res.json({msgError: 'El usuario no existe'});
