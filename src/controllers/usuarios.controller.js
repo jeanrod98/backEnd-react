@@ -31,7 +31,7 @@ export const postUsuarioAuth = async (req, res) => {
         .input('contrasenia_usu', contrasenia_usu)
         .query(queries.postUsuarioAuth);
         // console.log(result.recordset.length == 0);
-        const {id_usuario, nombre_usu, apellido_usu, tipo_usu} = result.recordset[0];
+        const {id_usuario, nombre_usu, apellido_usu, tipo_usu, celular_usu, direccion_usu} = result.recordset[0];
         // console.log(id_usuario);
         // console.log(nombre_usu);
         // console.log(apellido_usu);
@@ -41,7 +41,9 @@ export const postUsuarioAuth = async (req, res) => {
             nombre_usu: nombre_usu,
             apellido_usu: apellido_usu,
             tipo_usu: tipo_usu,
-            correo_usu
+            correo_usu,
+            celular_usu,
+            direccion_usu
         }
         if(result.recordset.length == 0){
             res.json({msgError: 'El usuario no existe'});

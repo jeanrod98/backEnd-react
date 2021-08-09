@@ -4,6 +4,9 @@ import fs from "fs";
 import fonts from "../facturacion/fonts";
 import styles from "../facturacion/styles";
 import { contenido } from "../facturacion/pdfContent";
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.PRIVATE_PK_STRIPE);
 
 // Importamos la base de datos
 import { getConnection, sql, queries } from "../database";
@@ -37,7 +40,7 @@ export const generarfacturas = async (req, res) => {
 
 // transaccion
 export const transaccion = async (req, res) => {
-  // console.log(req.body.contrasenia_usu)
+
   // se valida la transaccion
 
   const {
@@ -48,7 +51,9 @@ export const transaccion = async (req, res) => {
     productos,
     subTotal_produc,
     total_produc,
-    delivery_id,
+    delivery_precio,
+    id_transaccion, 
+    amount
   } = req.body;
 
   //!validar que los campos existan
@@ -59,106 +64,133 @@ export const transaccion = async (req, res) => {
     subTotal_produc == null ||
     total_produc == null ||
     productos.length <= 0 ||
-    delivery_id == null ||
-    nombre_cli == null
+    delivery_precio == null ||
+    nombre_cli == null ||
+    id_transaccion == null ||
+    amount == null
   ) {
     return res.status(400).json({ msg: "Por favor envíe todos los datos." });
   }
-  //Forma de pago
-
-  //captura los datos del usuario, los envia a la facturacion y optiene los datos de la factura
-  const result = contenido(
-    nombre_cli,
+  try {
+  //!Forma de pago
+  console.log(nombre_cli,
     id_usuario,
     direccion_cli,
     celular_cli,
     productos,
     subTotal_produc,
     total_produc,
-    delivery_id
-  );
-  //validamos el estado de la factura
-  let estadoFactura = "";
+    delivery_precio, 
+    id_transaccion,
+    amount);
+    //Stripe
+   const payment = await stripe.paymentIntents.create({
+      amount,
+      currency: "USD",
+      description: "Pagos Almacen Veicor WEB",
+      payment_method: id_transaccion,
+      confirm: true
 
-  if (delivery_id == 1) {
-    estadoFactura = "Pagado (pendiente envío)";
-  } else {
-    estadoFactura = "Pagado (sin envío)";
-  }
-  //se crea el pdf con la factura
-  try {
-    // contenido(req.body.correo_usu)
-    let docDefinition = {
-      content: result.content,
-      styles: styles,
-    };
+    })
+    // console.log(payment);
+    // validar el pago para emitir la factura 
+    if(payment){
+//!facturacion
+  //captura los datos del usuario, los envia a la facturacion y optiene los datos de la factura
+  // const result = contenido(
+  //   nombre_cli,
+  //   id_usuario,
+  //   direccion_cli,
+  //   celular_cli,
+  //   productos,
+  //   subTotal_produc,
+  //   total_produc,
+  //   delivery_precio
+  // );
+  // //validamos el estado de la factura
+  // let estadoFactura = "";
+  // let delivery_id = null;
 
-    const printer = await new PdfPrinter(fonts);
+  // if (delivery_precio > 0) {
+  //   estadoFactura = "Pagado (pendiente envío)";
+  //  delivery_id = 1
+  // } else {
+  //   estadoFactura = "Pagado (sin envío)";
+  //  delivery_id = 0
+  // }
+  //*se crea el pdf con la factura
 
-    let nombrePDF = new Date().getTime();
+    // let docDefinition = {
+    //   content: result.content,
+    //   styles: styles,
+    // };
 
-    let pdfDoc = printer.createPdfKitDocument(docDefinition);
-    pdfDoc.pipe(fs.createWriteStream(`public/pdfs/${nombrePDF}.pdf`));
-    pdfDoc.end();
-    // console.log(printer);
+    // const printer = await new PdfPrinter(fonts);
 
-    // *generamos la url de la factura
-    const URLFACT = `${process.env.HOST}${nombrePDF}.pdf`;
+    // let nombrePDF = new Date().getTime();
 
-    //Obtenemos la fecha actual
-    const fecha = new Date();
-    const fechaReg_fac = fecha.toUTCString();
+    // let pdfDoc = printer.createPdfKitDocument(docDefinition);
+    // pdfDoc.pipe(fs.createWriteStream(`public/pdfs/${nombrePDF}.pdf`));
+    // pdfDoc.end();
 
-    // console.log(estadoFactura);
 
-    // Inserta los datos de la factura en la base de datos
-    // TMAEFACTURA
+    // // *generamos la url de la factura
+    // const URLFACT = `${process.env.HOST}${nombrePDF}.pdf`;
 
-    // try {
-    // !GUARDAMOS EN LA TABLA DE FACTURA Y MOVDETALLEFACTURA
-    //llamamos la conexion que retorna el pool
-    const pool = await getConnection();
-    const respuesta = await pool
-      .request()
-      // .input("codigo_fac", sql.VarChar, id_producto)
-      .input("id_usuario", sql.VarChar, id_usuario)
-      .input("url_fac", sql.VarChar, URLFACT)
-      .input("fechaReg_fac", sql.SmallDateTime, fechaReg_fac)
-      .input("estado_fac", sql.VarChar, estadoFactura)
+    // //Obtenemos la fecha actual
+    // const fecha = new Date();
+    // const fechaReg_fac = fecha.toUTCString();
 
-      .query(queries.postFactura);
-    // Capturamos el id del registro
-    // console.log();
-    const id_factura = respuesta.recordset[0].SCOPE_IDENTITY;
-    //Insertamos en TMOVDETALLEFAC
-    productos.map((producto) => {
-        // const pool = getConnection();
-         pool
-        .request()
-        // .input("codigo_fac", sql.VarChar, id_producto)
-        .input("factura_id", sql.Int, id_factura)
-        .input("producto_id", sql.VarChar, producto.id_producto)
-        .input("cantidad_det", sql.Int, producto.cantidad_produc)
-        .input(
-          "precioUnitario_det",
-          sql.Decimal(18, 2),
-          producto.precioUnit_produc
-        )
-        .input("delivery_id", sql.VarChar, delivery_id)
+ 
+    // // !GUARDAMOS EN LA TABLA DE FACTURA Y MOVDETALLEFACTURA
+    // //llamamos la conexion que retorna el pool
+    // const pool = await getConnection();
+    // const respuesta = await pool
+    //   .request()
 
-        .query(queries.postFacturaMov);
-    });
+    //   .input("id_usuario", sql.VarChar, id_usuario)
+    //   .input("url_fac", sql.VarChar, URLFACT)
+    //   .input("fechaReg_fac", sql.SmallDateTime, fechaReg_fac)
+    //   .input("estado_fac", sql.VarChar, estadoFactura)
 
-    //*ENVIAMOS EL LINK DEL PDF AL FRONTEND
-    // console.log('se ejecuta');
-    res.json({ url: URLFACT});
+    //   .query(queries.postFactura);
+    // // Capturamos el id del registro
+ 
+    // const id_factura = respuesta.recordset[0].SCOPE_IDENTITY;
+    // //Insertamos en TMOVDETALLEFAC
+    // productos.map((producto) => {
 
+    //      pool
+    //     .request()
+    //     .input("factura_id", sql.Int, id_factura)
+    //     .input("producto_id", sql.VarChar, producto.id_producto)
+    //     .input("cantidad_det", sql.Int, producto.cantidad_produc)
+    //     .input(
+    //       "precioUnitario_det",
+    //       sql.Decimal(18, 2),
+    //       producto.precioUnit_produc
+    //     )
+    //     .input("delivery_id", sql.VarChar, delivery_id)
+
+    //     .query(queries.postFacturaMov);
+    // });
+
+    // //*ENVIAMOS EL LINK DEL PDF AL FRONTEND
+   
+    // res.json({ url: URLFACT});
+
+    }
+    // res.json({msg: 'Pago Exitoso!!'})
+  
     
 
     // res.json({ msg: URLFACT });
   } catch (error) {
     // console.log("no se creo el pdf");
-    res.status(500);
-    res.send(error.message);
+    // res.status(500);
+    // res.send(error.message);
+    res.json({message: error.raw.message, pdfMessge: "ErrorPDF014"})
   }
+
+
 };

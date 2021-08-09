@@ -16,17 +16,17 @@ export const contenido = (
   ],
   subTotal_produc = "000000",
   total_produc = "000000",
-  delivery_id = "000000"
+  delivery_precio = "000000"
 ) => {
   // Delivery si es 0 es NO si es 1 es SI y cambia el estado de la factura dependiendo del delivery
-  let delivery = "";
+  // let delivery = "";
   let estado_fac = "";
 
-  if (delivery_id == 1) {
-    delivery = "Sí";
+  if (delivery_precio > 0) {
+    // delivery = "Sí";
     estado_fac = "Pagado (pendiente envío)";
   } else {
-    delivery = "No";
+    // delivery = "No";
     estado_fac = "Pagado (sin envío)";
   }
 
@@ -169,7 +169,7 @@ export const contenido = (
               { text: "SUBTOTAL", style: "tableHeader", alignment: "start" },
               { text: "TOTAL", style: "tableHeader", alignment: "start" },
             ],
-            [estado_fac, delivery, subTotal_produc, total_produc],
+            [estado_fac, delivery_precio, subTotal_produc, total_produc],
           ],
         },
         layout: {
