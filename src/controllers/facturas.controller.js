@@ -14,6 +14,7 @@ import { getConnection, sql, queries } from "../database";
 import "dotenv";
 import { URL } from "url";
 
+//* facturas pdf
 export const generarfacturas = async (req, res) => {
   const result = contenido(req.body.correo_usu);
   // console.log(result);
@@ -38,7 +39,9 @@ export const generarfacturas = async (req, res) => {
   }
 };
 
-// transaccion
+
+
+// *transaccion
 export const transaccion = async (req, res) => {
 
   // se valida la transaccion
@@ -73,16 +76,16 @@ export const transaccion = async (req, res) => {
   }
   try {
   //!Forma de pago
-  console.log(nombre_cli,
-    id_usuario,
-    direccion_cli,
-    celular_cli,
-    productos,
-    subTotal_produc,
-    total_produc,
-    delivery_precio, 
-    id_transaccion,
-    amount);
+  // console.log(nombre_cli,
+  //   id_usuario,
+  //   direccion_cli,
+  //   celular_cli,
+  //   productos,
+  //   subTotal_produc,
+  //   total_produc,
+  //   delivery_precio, 
+  //   id_transaccion,
+  //   amount);
     //Stripe
    const payment = await stripe.paymentIntents.create({
       amount,
@@ -97,90 +100,90 @@ export const transaccion = async (req, res) => {
     if(payment){
 //!facturacion
   //captura los datos del usuario, los envia a la facturacion y optiene los datos de la factura
-  // const result = contenido(
-  //   nombre_cli,
-  //   id_usuario,
-  //   direccion_cli,
-  //   celular_cli,
-  //   productos,
-  //   subTotal_produc,
-  //   total_produc,
-  //   delivery_precio
-  // );
-  // //validamos el estado de la factura
-  // let estadoFactura = "";
-  // let delivery_id = null;
+  const result = contenido(
+    nombre_cli,
+    id_usuario,
+    direccion_cli,
+    celular_cli,
+    productos,
+    subTotal_produc,
+    total_produc,
+    delivery_precio
+  );
+  //validamos el estado de la factura
+  let estadoFactura = "";
+  let delivery_id = null;
 
-  // if (delivery_precio > 0) {
-  //   estadoFactura = "Pagado (pendiente envío)";
-  //  delivery_id = 1
-  // } else {
-  //   estadoFactura = "Pagado (sin envío)";
-  //  delivery_id = 0
-  // }
-  //*se crea el pdf con la factura
+  if (delivery_precio > 0) {
+    estadoFactura = "Pagado (pendiente envío)";
+   delivery_id = 1
+  } else {
+    estadoFactura = "Pagado (sin envío)";
+   delivery_id = 0
+  }
+  //se crea el pdf con la factura
 
-    // let docDefinition = {
-    //   content: result.content,
-    //   styles: styles,
-    // };
+    let docDefinition = {
+      content: result.content,
+      styles: styles,
+    };
 
-    // const printer = await new PdfPrinter(fonts);
+    const printer = await new PdfPrinter(fonts);
 
-    // let nombrePDF = new Date().getTime();
+    let nombrePDF = new Date().getTime();
 
-    // let pdfDoc = printer.createPdfKitDocument(docDefinition);
-    // pdfDoc.pipe(fs.createWriteStream(`public/pdfs/${nombrePDF}.pdf`));
-    // pdfDoc.end();
+    let pdfDoc = printer.createPdfKitDocument(docDefinition);
+    pdfDoc.pipe(fs.createWriteStream(`public/pdfs/${nombrePDF}.pdf`));
+    pdfDoc.end();
 
 
-    // // *generamos la url de la factura
-    // const URLFACT = `${process.env.HOST}${nombrePDF}.pdf`;
+    // *generamos la url de la factura
+    const URLFACT = `${process.env.HOST}${nombrePDF}.pdf`;
 
-    // //Obtenemos la fecha actual
-    // const fecha = new Date();
-    // const fechaReg_fac = fecha.toUTCString();
+    //Obtenemos la fecha actual
+    const fecha = new Date();
+    const fechaReg_fac = fecha.toUTCString();
 
  
-    // // !GUARDAMOS EN LA TABLA DE FACTURA Y MOVDETALLEFACTURA
-    // //llamamos la conexion que retorna el pool
-    // const pool = await getConnection();
-    // const respuesta = await pool
-    //   .request()
+    // !GUARDAMOS EN LA TABLA DE FACTURA Y MOVDETALLEFACTURA
+    //llamamos la conexion que retorna el pool
+    const pool = await getConnection();
+    const respuesta = await pool
+      .request()
 
-    //   .input("id_usuario", sql.VarChar, id_usuario)
-    //   .input("url_fac", sql.VarChar, URLFACT)
-    //   .input("fechaReg_fac", sql.SmallDateTime, fechaReg_fac)
-    //   .input("estado_fac", sql.VarChar, estadoFactura)
+      .input("id_usuario", sql.VarChar, id_usuario)
+      .input("url_fac", sql.VarChar, URLFACT)
+      .input("fechaReg_fac", sql.SmallDateTime, fechaReg_fac)
+      .input("estado_fac", sql.VarChar, estadoFactura)
 
-    //   .query(queries.postFactura);
-    // // Capturamos el id del registro
+      .query(queries.postFactura);
+    // Capturamos el id del registro
  
-    // const id_factura = respuesta.recordset[0].SCOPE_IDENTITY;
-    // //Insertamos en TMOVDETALLEFAC
-    // productos.map((producto) => {
+    const id_factura = respuesta.recordset[0].SCOPE_IDENTITY;
+    //Insertamos en TMOVDETALLEFAC
+    productos.map((producto) => {
+      console.log(producto);
+         pool
+        .request()
+        .input("factura_id", sql.Int, id_factura)
+        .input("producto_id", sql.VarChar, producto.id_producto)
+        .input("cantidad_det", sql.Int, producto.cantidad_producto)
+        .input(
+          "precioUnitario_det",
+          sql.Decimal(18, 2),
+          producto.precio_produc
+        )
+        .input("delivery_id", sql.VarChar, delivery_id)
 
-    //      pool
-    //     .request()
-    //     .input("factura_id", sql.Int, id_factura)
-    //     .input("producto_id", sql.VarChar, producto.id_producto)
-    //     .input("cantidad_det", sql.Int, producto.cantidad_produc)
-    //     .input(
-    //       "precioUnitario_det",
-    //       sql.Decimal(18, 2),
-    //       producto.precioUnit_produc
-    //     )
-    //     .input("delivery_id", sql.VarChar, delivery_id)
+        .query(queries.postFacturaMov);
+    });
 
-    //     .query(queries.postFacturaMov);
-    // });
-
-    // //*ENVIAMOS EL LINK DEL PDF AL FRONTEND
+    // ENVIAMOS EL LINK DEL PDF AL FRONTEND
    
     // res.json({ url: URLFACT});
 
     }
-    // res.json({msg: 'Pago Exitoso!!'})
+    res.json({msg: 'Pago Exitoso!!'})
   
     
 
@@ -192,5 +195,91 @@ export const transaccion = async (req, res) => {
     res.json({message: error.raw.message, pdfMessge: "ErrorPDF014"})
   }
 
+
+};
+
+
+//* api get facturas
+export const consultarFacturas = async(req, res) => {
+  try {
+        
+    //llamamos la conexion que retorna el pool 
+    const pool = await getConnection();
+    //con el pool realizamos la peticion en este caso pide los usuarios de la bd
+    const result = await pool.request().query(queries.getAllFacturas);
+    res.json(result.recordset);
+
+} catch (error) {
+    res.status(500);
+    res.send(error.message);
+    
+}
+
+};
+
+//* api factura por id usuario
+export const consultarFacturaById = async (req, res) =>{
+  try {
+        
+    // obtener el id que nos mandan 
+    const {id} = req.params 
+    //llamamos la conexion que retorna el pool 
+    const pool = await getConnection();
+    //con el pool realizamos la peticion en este caso pide los productos de la bd
+    const result = await pool.request()
+    .input('id', id)
+    .query(queries.getFacturaById);
+
+    result.recordset[0]
+  
+    res.json(result.recordset);
+
+
+} catch (error) {
+    res.status(500);
+    res.send(error.message);
+    
+}
+
+};
+
+//* consultarFacturasPendientes
+export const consultarFacturasPendientes = async (req, res) => {
+
+  try {
+        
+    //llamamos la conexion que retorna el pool 
+    const pool = await getConnection();
+    //con el pool realizamos la peticion en este caso pide los usuarios de la bd
+    const result = await pool.request().query(queries.getAllFacturasPendientes);
+    res.json(result.recordset);
+
+} catch (error) {
+    res.status(500);
+    res.send(error.message);
+    
+}
+};
+
+//* updateEstadoFactura
+
+export const updateEstadoFactura = async(req, res) => {
+  const {estado_fac} = req.body;
+
+  const {id} = req.params
+  // console.log(estado_fac);
+  // console.log(id);
+  try {
+    const pool = await getConnection();
+    await pool
+    .request()
+    .input("estado_fac", sql.VarChar, estado_fac)
+    .input("codigo_fac", sql.Int, id)
+    .query(queries.updateFacturaPendiente);
+    res.json({msg: 'success'})
+  } catch (error) {
+    console.log(error);
+    
+  }
 
 };

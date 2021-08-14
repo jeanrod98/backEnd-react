@@ -125,6 +125,7 @@ export const createUsuario = async (req, res) => {
             tipo_usu = 'Cliente';
     
         }
+
         
         
          //Obtenemos la fecha actual
@@ -153,10 +154,11 @@ export const createUsuario = async (req, res) => {
             VALUES (@id_usuario, @nombre_usu, @apellido_usu, @direccion_usu, @convencional_usu, @celular_usu, @contrasenia_usu, @correo_usu, @tipo_usu, @fechaReg_usu)`
         );
     
-        res.json('Nuevo Cliente')
+        res.json({msgSuccess: 'success'})
     } catch (error) {
-        res.status(500);
-        res.send(error.message);
+        // res.status(500);
+        // res.send(error.message);
+        res.json({msgError: 'error add user'})
         
     }
 };

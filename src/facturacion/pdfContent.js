@@ -34,7 +34,7 @@ export const contenido = (
   let producto_carrito = "";
   //recorrer el carrito para sacar los productos
   carrito.forEach(function (producto) {
-    producto_carrito += `#Código: ${producto.id_producto} || Nombre Producto: ${producto.nombre_produc} || Cantidad: ${producto.cantidad_produc} || Precio Unitario: ${producto.precioUnit_produc}\n\n`;
+    producto_carrito += `#Código: ${producto.id_producto} || Nombre Producto: ${producto.nombre_produc} || Cantidad: ${producto.cantidad_producto} || Precio Unitario: ${producto.precio_produc}\n\n`;
   });
   // console.log(producto_carrito);
   // console.log(__dirname.);
