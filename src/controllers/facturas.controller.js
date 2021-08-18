@@ -157,12 +157,12 @@ export const transaccion = async (req, res) => {
       .input("estado_fac", sql.VarChar, estadoFactura)
 
       .query(queries.postFactura);
-    // Capturamos el id del registro
- 
+
+    // Capturamos el id del registro 
     const id_factura = respuesta.recordset[0].SCOPE_IDENTITY;
     //Insertamos en TMOVDETALLEFAC
     productos.map((producto) => {
-      console.log(producto);
+      // console.log(producto);
          pool
         .request()
         .input("factura_id", sql.Int, id_factura)
@@ -174,9 +174,18 @@ export const transaccion = async (req, res) => {
           producto.precio_produc
         )
         .input("delivery_id", sql.VarChar, delivery_id)
-
         .query(queries.postFacturaMov);
+        
+        //Actualizar stock de los productos comprados
+        pool
+        .request()
+        .input("id_producto", sql.VarChar, producto.id_producto)
+        .input("cantidad_producto", sql.Int, producto.cantidad_producto)
+        .query(queries.actualizarStock);
+
     });
+
+
 
     // ENVIAMOS EL LINK DEL PDF AL FRONTEND
    

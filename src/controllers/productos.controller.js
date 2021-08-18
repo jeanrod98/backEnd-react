@@ -36,17 +36,44 @@ export const getProductoByID = async (req, res) => {
 //ingresar productos
 export const createProducto = async (req, res) => {
   try {
+    // const {
+    //   id_producto,
+    //   nombre_produc,
+    //   cantidad_produc,
+    //   descripcion_produc,
+    //   precio_produc,
+    //   pesoImg_produc,
+    //   nombreImg_produc,
+    //   promocion_produc,
+    //   imagen_produc,
+    // } = req.body;
+
+    const { producto } = req.body;
+    const productoJSon = JSON.parse(producto)
+   
+    const file = req.file;
+    // console.log(file);
     const {
       id_producto,
       nombre_produc,
       cantidad_produc,
       descripcion_produc,
       precio_produc,
-      pesoImg_produc,
-      nombreImg_produc,
       promocion_produc,
-      imagen_produc,
-    } = req.body;
+      dscpLarga_produc,
+      imagen_produc
+    } = productoJSon;
+   
+    
+    //url de la imagen 
+    let urlImg = ''
+    if(file){
+      urlImg = `${process.env.HOST}${file.filename}`
+    }else if(imagen_produc == '' || imagen_produc === null){
+      urlImg = `${process.env.HOST}no-image.png`;
+    }else{
+      urlImg = imagen_produc;
+    }
 
     //validar que los campos existan
     if (
@@ -55,14 +82,12 @@ export const createProducto = async (req, res) => {
       cantidad_produc == null ||
       descripcion_produc == null ||
       precio_produc == null ||
-      pesoImg_produc == null ||
-      nombreImg_produc == null ||
-      promocion_produc == null ||
-      imagen_produc == null
+      dscpLarga_produc == null ||
+      promocion_produc == null
     ) {
       return res.status(400).json({ msg: "Por favor llene todo los campos." });
     }
-
+console.log(productoJSon);
     //Obtenemos la fecha actual
     const fecha = new Date();
     const fechaReg_produc = fecha.toUTCString();
@@ -77,10 +102,8 @@ export const createProducto = async (req, res) => {
       .input("cantidad_produc", sql.Int, cantidad_produc)
       .input("descripcion_produc", sql.VarChar, descripcion_produc)
       .input("precio_produc", sql.Decimal(18, 2), precio_produc)
-      .input("pesoImg_produc", sql.Int, pesoImg_produc)
-      .input("nombreImg_produc", sql.VarChar, nombreImg_produc)
       .input("promocion_produc", sql.Int, promocion_produc)
-      .input("imagen_produc", sql.VarChar, imagen_produc)
+      .input("imagen_produc", sql.VarChar, urlImg)
       .input("fechaReg_produc", sql.SmallDateTime, fechaReg_produc)
 
       .query(queries.addNewProducts);
@@ -98,8 +121,8 @@ export const createProducto = async (req, res) => {
       fechaReg_produc,
     });
   } catch (error) {
-    res.status(500);
-    res.send(error.message);
+    // res.status(500);
+    res.json({msg: 'error'});
   }
 };
 
@@ -107,15 +130,14 @@ export const createProducto = async (req, res) => {
 export const updateProducto = async (req, res) => {
   const { id } = req.params;
 
-  const fecha = new Date();
-  const fechaActualizacion = fecha.toUTCString();
-
   try {
     // console.log(req.file);
+    // console.log(req.body);
     const { producto } = req.body;
-    // console.log();
-    const productoJson = JSON.parse(producto);
+    const productoJSon = JSON.parse(producto)
+   
     const file = req.file;
+    // console.log(file);
     const {
       id_producto,
       nombre_produc,
@@ -123,18 +145,23 @@ export const updateProducto = async (req, res) => {
       descripcion_produc,
       precio_produc,
       promocion_produc,
-      dscpLarga_produc
-    } = productoJson;
-    // console.log(file);
-    // console.log(promocion_produc);
-    // console.log(id_producto);
+      dscpLarga_produc,
+      imagen_produc
+    } = productoJSon;
+   
     //fecha de registro
     const fecha = new Date();
     const fechaReg_produc = fecha.toUTCString();
 
     //url de la imagen 
-    const urlImg = `${process.env.HOST}${file.filename}`
-    // console.log(urlImg);
+    let urlImg = ''
+    if(file){
+      urlImg = `${process.env.HOST}${file.filename}`
+    }else if(imagen_produc == ''){
+      urlImg = `${process.env.HOST}no-image.png`;
+    }else{
+      urlImg = imagen_produc;
+    }
     
     
     //guardar en la base de datos
@@ -142,7 +169,7 @@ export const updateProducto = async (req, res) => {
       const pool = await getConnection();
       await pool
       .request()
-      .input("id_producto", sql.VarChar, id_producto)
+      .input("id_producto", sql.VarChar, id)
       .input("nombre_produc", sql.VarChar, nombre_produc)
       .input("cantidad_produc", sql.Int, cantidad_produc)
       .input("descripcion_produc", sql.VarChar, descripcion_produc)
@@ -151,8 +178,6 @@ export const updateProducto = async (req, res) => {
       .input("dscpLarga_produc", sql.VarChar, dscpLarga_produc)
 
       .input("fechaReg_produc", sql.SmallDateTime, fechaReg_produc)
-      .input("pesoImg_produc", sql.Int, file.size)
-      .input("nombreImg_produc", sql.VarChar, file.filename)
       .input("imagen_produc", sql.VarChar, urlImg)
 
       .query(queries.updateProduct);
@@ -160,7 +185,24 @@ export const updateProducto = async (req, res) => {
     res.json({ msg: "success" });
   } catch (error) {
     console.log(error);
+    res.json({ msg: "error" });
   }
 };
 
 // Eliminar Productos
+export const deleteProducto = async (req, res) => {
+  const { id } = req.params;
+  try {
+    // console.log(id);
+    const pool = await getConnection();
+      await pool
+      .request()
+      .input("id_produc", id)
+      .query(queries.deleteProduct)
+      res.json({ msg: "success" });
+  } catch (error) {
+    console.log(error);
+    res.json({ msg: "error" });
+  }
+
+}
